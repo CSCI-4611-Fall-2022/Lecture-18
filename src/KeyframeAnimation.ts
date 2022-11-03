@@ -56,7 +56,11 @@ export class KeyframeAnimation
         }
         else
         {
-            const frameTime = this.keyframeTimes[index - 1] + this.animationSpeed;
+            const distance = this.targetObject.position.distanceTo(
+                this.linearPath.controlPoints[index - 1] 
+            );
+
+            const frameTime = this.keyframeTimes[index - 1] + distance / this.animationSpeed;
             this.keyframeTimes.push(frameTime);
             this.linearPath.controlPoints.push(this.targetObject.position.clone());
 
