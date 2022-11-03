@@ -17,6 +17,9 @@ export class KeyframeAnimation
 
     public keyframeTimes: number[];
     public linearPath: gfx.LinearPath3;
+
+    public currentTime: number;
+    public currentFrame: number;
     
     constructor(targetObject: gfx.Transform3, animationSpeed: number)
     {
@@ -26,12 +29,14 @@ export class KeyframeAnimation
 
         this.keyframeTimes = [];
         this.linearPath = new gfx.LinearPath3();
+
+        this.currentTime = -1;
+        this.currentFrame = 0;
     }
 
     isPlaying(): boolean
     {
-        // TO BE ADDED
-        return false;
+        return this.currentTime >= 0;
     }
 
     addKeyframe(): void
@@ -66,12 +71,16 @@ export class KeyframeAnimation
 
     stop(): void
     {
-        // TO BE ADDED
+        this.currentTime = -1;
+        this.currentFrame = 0;
     }
 
     reset(): void
     {
-        // TO BE ADDED
+        this.stop();
+        this.keyframeTimes = [];
+        this.linearPath.controlPoints = [];
+        console.log('Keyframes reset.');
     }
 
     update(deltaTime: number)
