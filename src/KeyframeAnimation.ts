@@ -66,7 +66,16 @@ export class KeyframeAnimation
 
     play(): void
     {
-       // TO BE ADDED
+        if(this.keyframeTimes.length >= 2)
+        {
+            this.currentTime = 0;
+            this.currentFrame = 0;
+        }
+        else
+        {
+            this.stop();
+            console.log('Sorry, I can\'t generate a linear path until you add two keyframes.');
+        }
     }
 
     stop(): void
@@ -85,6 +94,41 @@ export class KeyframeAnimation
 
     update(deltaTime: number)
     {
-        // TO BE ADDED
+        if(this.isPlaying())
+        {
+            // Advance the time
+            this.currentTime += deltaTime;
+
+            // Check to see if we should advance the current frame
+            if(this.currentTime >= this.keyframeTimes[this.currentFrame+1])
+            {
+                this.currentFrame++;
+            }
+
+            // If we have reached the final frame, then stop the animation
+            if(this.currentFrame >= this.keyframeTimes.length - 1)
+            {
+                this.stop();
+            }
+            // Otherwise, compute the next point along the path
+            else 
+            {
+                const totalFrameTime = this.keyframeTimes[this.currentFrame+1] - this.keyframeTimes[this.currentFrame];
+                const currentFrameTime = this.currentTime - this.keyframeTimes[this.currentFrame];
+
+                const point: gfx.Vector3 | null = this.linearPath.getPoint(this.currentFrame, currentFrameTime / totalFrameTime);
+
+                // If the path generated a valid point, then update the target object
+                if(point)
+                {
+                    this.targetObject.position = point;
+                }
+                // The path did not generate a valid point, so stop the animation
+                else
+                {
+                    this.stop();
+                }
+            }
+        }
     }
 }
