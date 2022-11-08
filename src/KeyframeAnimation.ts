@@ -17,6 +17,7 @@ export class KeyframeAnimation
 
     public keyframeTimes: number[];
     public linearPath: gfx.LinearPath3;
+    public curvePath: gfx.CurvePath3;
 
     public currentTime: number;
     public currentFrame: number;
@@ -29,6 +30,7 @@ export class KeyframeAnimation
 
         this.keyframeTimes = [];
         this.linearPath = new gfx.LinearPath3();
+        this.curvePath = new gfx.CurvePath3();
 
         this.currentTime = -1;
         this.currentFrame = 0;
@@ -47,6 +49,7 @@ export class KeyframeAnimation
         {
             this.keyframeTimes.push(0);
             this.linearPath.controlPoints.push(this.targetObject.position.clone());
+            this.curvePath.controlPoints.push(this.targetObject.position.clone());
 
             console.log('Added keyframe ' + (index + 1) + '.');
         }
@@ -63,6 +66,7 @@ export class KeyframeAnimation
             const frameTime = this.keyframeTimes[index - 1] + distance / this.animationSpeed;
             this.keyframeTimes.push(frameTime);
             this.linearPath.controlPoints.push(this.targetObject.position.clone());
+            this.curvePath.controlPoints.push(this.targetObject.position.clone());
 
             console.log('Added keyframe ' + (index + 1) + '.');
         }
@@ -70,15 +74,32 @@ export class KeyframeAnimation
 
     play(): void
     {
-        if(this.keyframeTimes.length >= 2)
+        if(this.motionMode == 'Linear')
         {
-            this.currentTime = 0;
-            this.currentFrame = 0;
+            if(this.keyframeTimes.length >= 2)
+            {
+                this.currentTime = 0;
+                this.currentFrame = 0;
+            }
+            else
+            {
+                this.stop();
+                console.log('Sorry, I can\'t generate a linear path until you add two keyframes.');
+            }
         }
         else
         {
-            this.stop();
-            console.log('Sorry, I can\'t generate a linear path until you add two keyframes.');
+            if(this.keyframeTimes.length >= 4)
+            {
+                this.currentTime = 0;
+                this.currentFrame = 0;
+            }
+            else
+            {
+                this.stop();
+                console.log('Sorry, I can\'t generate a smooth curve until you add four keyframes.');
+                console.log('Why, you ask? Ask Catmull. Or Rom.');
+            }
         }
     }
 
@@ -120,7 +141,12 @@ export class KeyframeAnimation
                 const totalFrameTime = this.keyframeTimes[this.currentFrame+1] - this.keyframeTimes[this.currentFrame];
                 const currentFrameTime = this.currentTime - this.keyframeTimes[this.currentFrame];
 
-                const point: gfx.Vector3 | null = this.linearPath.getPoint(this.currentFrame, currentFrameTime / totalFrameTime);
+                let point: gfx.Vector3 | null;
+
+                if(this.motionMode == 'Linear')
+                    point = this.linearPath.getPoint(this.currentFrame, currentFrameTime / totalFrameTime);
+                else
+                    point = this.curvePath.getPoint(this.currentFrame, currentFrameTime / totalFrameTime);
 
                 // If the path generated a valid point, then update the target object
                 if(point)
